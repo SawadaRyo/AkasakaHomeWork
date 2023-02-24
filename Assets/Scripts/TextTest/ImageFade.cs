@@ -16,17 +16,17 @@ public class ImageFade : MonoBehaviour
     void OnEnable()
     {
         _textLoad = GameObject.FindObjectOfType<TextLoad>();
-        _textLoad.LoadDelegate += FadeIn;
+        _textLoad.Scenarios.LoadDelegate += FadeIn;
         //_textLoad.LoadDelegate += FadeOut;
     }
 
     // Update is called once per frame
     void OnDisable()
     {
-        _textLoad.LoadDelegate -= FadeIn;
+        _textLoad.Scenarios.LoadDelegate -= FadeIn;
         //_textLoad.LoadDelegate -= FadeOut;
     }
-    void FadeIn()
+    void FadeIn(TextLoad textLoad)
     {
         Color c = _image.material.color;
         DOTween.To(x => c.a = x
@@ -35,7 +35,7 @@ public class ImageFade : MonoBehaviour
                     .OnUpdate(() => _image.color = c);
     }
 
-    void FadeOut()
+    void FadeOut(TextLoad textLoad)
     {
         Color c = _image.material.color;
         DOTween.To(x => c.a = x

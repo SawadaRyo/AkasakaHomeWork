@@ -8,7 +8,7 @@ using UniRx;
 public class TextLoad : MonoBehaviour
 {
     [SerializeField, Tooltip("表示するテキストの配列")]
-    MessageData scenarios;
+    MessageData _scenarios;
     [SerializeField]
     PanelObjects _panelObjects;
     [SerializeField]
@@ -20,8 +20,6 @@ public class TextLoad : MonoBehaviour
     [Range(0.001f, 0.3f), SerializeField] float intervalForCharacterDisplay = 0.05f;
 
 
-    public delegate void TextLoadDelegate();
-    event TextLoadDelegate _textLoadDelegate = null;
 
     [Tooltip("現在表示しているテキスト")]
     string _currentText = string.Empty;
@@ -35,7 +33,8 @@ public class TextLoad : MonoBehaviour
     float _timeElapsed = 1;
     InputAsyncAwait _asyncAwait = new();
 
-    public TextLoadDelegate LoadDelegate { get => _textLoadDelegate; set => _textLoadDelegate = value; }
+
+    public MessageData Scenarios => _scenarios;
 
     void Start()
     {
@@ -50,7 +49,7 @@ public class TextLoad : MonoBehaviour
         {
             yield return ActionOfMouseInput();
             yield return _asyncAwait.WaitForMouseButtonDown(out _);
-            if(_currentLine == scenarios.Messages.Length)
+            if (_currentLine == _scenarios.Messages.Length)
             {
                 Debug.Log("Finish");
                 _panelObjects.ActiveObj(false);
@@ -59,7 +58,6 @@ public class TextLoad : MonoBehaviour
             SetNextLine();
             yield return null;
         }
-
     }
 
     void LoadTextTime(IAwaiter<int> awaiter)
@@ -105,9 +103,17 @@ public class TextLoad : MonoBehaviour
     void SetNextLine()
     {
         intervalForCharacterDisplay = 0.05f;
-        _nameText.text = scenarios.Messages[_currentLine].NameStr;
-        _currentText = scenarios.Messages[_currentLine].MessageStr;
-        _image.sprite = scenarios.Messages[_currentLine].CharacterImage;
+        _nameText.text = _scenarios.Messages[_currentLine].NameStr;
+        _currentText = _scenarios.Messages[_currentLine].MessageStr;
+        _image.sprite = _scenarios.Messages[_currentLine].CharacterImage;
+        switch (_scenarios.Messages[_currentLine].UnityEvents)
+        {
+            case EventState.Fade:
+                _scenarios.LoadDelegate(this);
+                break;
+            default:
+                break;
+        }
         _currentLine++;
 
         _timeUntilDisplay = _currentText.Length * intervalForCharacterDisplay;
